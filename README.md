@@ -72,6 +72,24 @@ So now that I have my values set up for analyzing the image, what I then do is p
 <br />
 If the coordinate passes all these checks, the coordinate is marked complete in the thinning algorithm and I place a shape, line, chicken, or other effect. Finally, I set the current X,Y coordinate to the previous X,Y before the loop continues.
 
+##### How different effects are drawn:
+If you take a look at some of my sample images, you'll notice a variety of different effects beyond just the chickens, and even with the chickens you may be wondering how I can get so detailed by filling the different parts of the chicken with different colors.<br />
+
+As for the chickens, each one is actually 4 different png files. I've been extracting these chicken doodles from my physical work as an artist into photoshop, and chopping each one into 4 different pieces:<br />
+The outline<br />
+The main body<br />
+Detail 1<br />
+Detail 2<br />
+
+Each of these files is imported into the algorithm as a white image and then tinted to the color of the pixel. I can get extra color detail onto each chicken by tinting certain parts the color of the previous pixel or the color of the image before preprocessing, but I tend to tint the outline color black. Currently, I have about 80 chickens indexed which equates to about 320 tiny png files. I have A LOT of chickens I've drawn over the years that I intend on eventually indexing into this algorithm, I'm anticipating that number will eventually be 1000. <br />
+
+As for the other effects...<br />
+
+The shapes are coded geometry using common algorithms for different shapes I found online. Some of the shapes like the polygon and starts have algorithms that can take in a number and spit out a shape with a different number of sides or points, so I've baked some randomness into the algorithm that can switch up how many sides or points a shape has. In addition, I'm using a library called p5.scribble that can give objects created on the p5 canvas a handrawn look. This is helpful in that it helps produce an even look between the shapes and chicken images. However, I did have to adjust the shape algorithms to be able to work with p5.scribble as the way p5.scribble creates shapes and vertices is different than how I initially found the algorithms. <br />
+
+The curvey line effect was acheived using the curveVertex() function in p5js. It plots a handful of points and draws a curve through them. I actually initially was interested in designing this algorithm to work with this method. As a more complicated effect, I can't just plot a point at every pixel coordinate or else I'd end up with the entire image being a line, so I had to implement a thinning algorithm to spread out the coordinates (discussed below). This thinning algorithm helped with acheiving a higher level of detail in the output image when plotting just shapes as well.<br />
+
+The painted effect is a flocking algorithm I found online following the Coding Train. I'm not exactly a physics expert so I won't go into detail on how it works but it is simulating how birds/bees flock in the air, and adds a nice motion on the image when generating that reminds me somewhat of spray paint.<br />
 #### Thinning algorithm:
 The thinning algorithm is simple but also leads to a lot of memory issues. However, without it, certain effects wouldn’t work and the speed at which effects are placed can cause too heavy a load due to all the checks the algorithm needs to do, also resulting in performance issues. <br />
 Essentially, the thinning algorithm takes the current coordinate and checks the coordinates around it spanning a distance related to the thin amount. If none of the coordinates are marked completed, then all those points are marked as completed.<br />
@@ -140,7 +158,7 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 *This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix apis to capture even more details* <br />
 ![plot](/output%20images/hasibportrait-withfacialrecognition.png)
 
-*This one is just pretty :)* <br />
+*This a sample gif of an image being generated. This is sped up and is using the original version of the algorithm where I generate the layers one at a time. The current iteration can have the layers generate all at once* <br />
 ![plot](/output%20images/meintahoe-gen.png)
 
 *This is a sneak peek into what kind of effects I can acheive with shaders.* <br />

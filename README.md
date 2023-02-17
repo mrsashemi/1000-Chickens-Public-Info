@@ -41,8 +41,7 @@ Gy = Gradient y-direction<br />
 This isn’t my area of expertise, so I won’t dive to deep into it, but more information on edge detection can be found here:<br />
 https://idmnyu.github.io/p5.js-image/Edge/index.html
 
-The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.<br />
-<br />
+The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.
 
 #### Draw Image:
 Once we set up the canvas and preprocess the image, I am ready to begin drawing. As mentioned, the basic idea is to draw the image in layers according to the brightness values. This specifically allows me to not only control the shape, size, & density of the points, but makes it easier to use more complicated effects like curve lines resembling a sketch using curveVertex in p5js. <br />
@@ -64,8 +63,7 @@ So now that I have my values set up for analyzing the image, what I then do is p
 → Is the distance between the current & previous pixel within the threshold?<br />
 → Have I used this coordinate before? (Check it against the thinning algorithm)<br />
 <br />
-If the coordinate passes all these checks, the coordinate is marked complete in the thinning algorithm and I place a shape, line, chicken, or other effect. Finally, I set the current X,Y coordinate to the previous X,Y before the loop continues.<br />
-<br />
+If the coordinate passes all these checks, the coordinate is marked complete in the thinning algorithm and I place a shape, line, chicken, or other effect. Finally, I set the current X,Y coordinate to the previous X,Y before the loop continues.
 
 #### Thinning algorithm:
 The thinning algorithm is simple but also leads to a lot of memory issues. However, without it, certain effects wouldn’t work and the speed at which effects are placed can cause too heavy a load due to all the checks the algorithm needs to do, also resulting in performance issues. <br />

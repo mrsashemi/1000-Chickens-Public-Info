@@ -141,9 +141,7 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 ![plot](/output%20images/hasibportrait-withfacialrecognition.png)
 
 *This is a sneak peek into what kind of effects I can acheive with shaders.* <br />
-<video controls>
-  <source src="/output%20images/shaders-sample.mov" type="video/mp4">
-</video>
+![video](/output%20images/shader-sample.gif)
 
 
 

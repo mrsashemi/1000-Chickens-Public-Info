@@ -140,6 +140,9 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 *This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix api's to capture even more details* <br />
 ![plot](/output%20images/hasibportrait-withfacialrecognition.png)
 
+*This one is just pretty :)* <br />
+![plot](/output%20images/meintahoe-gen.png)
+
 *This is a sneak peek into what kind of effects I can acheive with shaders.* <br />
 ![video](/output%20images/shader-sample.gif)
 

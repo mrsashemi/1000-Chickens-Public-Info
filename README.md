@@ -152,7 +152,7 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 
 ## Additional Examples
 
-*Sketch Only: My initial goal before this algorithm involved my doodles was having the algorithm create sketches* <br />
+*Sketch Only: My initial goal before this algorithm involved my doodles was having the algorithm create sketches. The algorithm could still use fine tuning for sketches specifically, however, since I've moved on to focusing on different effects, it hasn't been my main focus.* <br />
 ![image-sketch](/output%20images/murakami-sketch-gen.png)
 
 *This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix apis to capture even more details* <br />

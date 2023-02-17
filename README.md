@@ -5,7 +5,7 @@
 
 I have included examples of resulting output images and input images used, including the directory where I have indexed the chicken file pngs. I have also included a javascript file showing the quadtree class used to optimize the algorithm. The rest of this README will include journal entries detailing some of my process creating and optimizing this algorithm, plans for the algorithm, and credits to other developers/generative artists that helped inspire the different directions this project took. 
 
-![plot](generation-test.png)<br />
+![image-gen](generation-test.png)<br />
 
 *Scroll down to see other examples (taken from output images folder)*
 
@@ -46,7 +46,7 @@ https://idmnyu.github.io/p5.js-image/Edge/index.html
 The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.<br />
 
 *Here is a sample of what the preprocessed image would look like before being fed into the algorithm for analysis. You might notice a lot of black around the edges detected in the posterization. I actually deal with that by setting the colors of the final layer drawn, the layer that captures the darkest colors, to the colors of the original imported image instead of the colors of the posterized image.*<br />
-![plot](/output%20images/posterizewithedgedetection.png)<br />
+![image-edge-posterize](/output%20images/posterizewithedgedetection.png)<br />
 
 
 
@@ -153,16 +153,16 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 ## Additional Examples
 
 *Sketch Only: My initial goal before this algorithm involved my doodles was having the algorithm create sketches* <br />
-![plot](/output%20images/murakami-sketch-gen.png)
+![image-sketch](/output%20images/murakami-sketch-gen.png)
 
 *This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix apis to capture even more details* <br />
-![plot](/output%20images/hasibportrait-withfacialrecognition.png)
+![image-gen](/output%20images/hasibportrait-withfacialrecognition.png)
 
 *This a sample gif of an image being generated. This is sped up and is using the original version of the algorithm where I generate the layers one at a time. The current iteration can have the layers generate all at once* <br />
-![plot](/output%20images/meintahoe-gen.png)
+![video-gen](/output%20images/sample-gen.gif)
 
 *This is a sneak peek into what kind of effects I can acheive with shaders.* <br />
-![video](/output%20images/shader-sample.gif)
+![video-shader](/output%20images/shader-sample.gif)
 
 
 

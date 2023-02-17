@@ -51,7 +51,7 @@ Brightness Ranges = [255, 180, 120, 90, 60, 30, 0]<br />
 Upper limit = Brightness Range[ Count ], ex. 255<br />
 Lower limit = Brightness Range[ Count + 1 ] ex. 180<br />
 <br />
-Distance Threshold = [Array of values that can change based on size of image, ex. 100, 200..]
+Distance Threshold = [Array of values that can change based on size of image, ex. 100, 200..]<br />
 → This more specifically is for drawing curves or for a paint simulation. I don’t want a line being drawn all the way across the image if two unrelated regions of the image have the same brightness values.<br />
 <br />
 Thin Amount = [Array of values]<br />

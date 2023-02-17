@@ -99,8 +99,8 @@ Cache coherence refers to the problem of ensuring that multiple cache copies of 
 <br />
 → Essentially there is one instruction copy in main memory & one in each cache. If one copy is changed, the other copies must also be changed. <br />
 
-CPU1|Cache 1	CPU2|Cache2            CPU3|Cache3           SHARED MEMORY
-|______________________|_________________|___________________________|
+CPU1|Cache 1	CPU2|Cache2            CPU3|Cache3           SHARED MEMORY<br />
+|______________________|_________________|___________________________|<br />
 
 So what does this have to do with our drawing algorithm?<br />
 <br />

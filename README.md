@@ -21,127 +21,128 @@ At this point, one option for further optimization is migrating the algorithm to
 The other option, and the one im currently exploring, is creating a new iteration using GLSL shaders. Shaders would allow me code directly to the GPU, and are capable of manipulating the entire matrix of pixels all at once. It's essentially how computer graphics and video games are made. It's very challenging as it's pure matrix math and the logic flips everything I know about programming on its head, but already began playing around with them. Essentially, I can use WEBGL mode in p5js to display the shaders. I may not be able to get the exact same effect, but I should be able to create an extremely powerful version that is hostable and with even more interesting effects (currently I'm testing a watercolor effect). 
 
 ## Process (Past Journal Entries)
-I've added below some past journal entries I wrote on building and optimizing the algorthim 
+I've added below some past journal entries I wrote on building and optimizing the algorthim <br />
 
 ### 10/24/22
 
-Below is pseudocode for my drawing algorithm & other thoughts on my process. Note everything was built in the stated order.
+Below is pseudocode for my drawing algorithm & other thoughts on my process. Note everything was built in the stated order.<br />
 
 #### Preprocess image:
-The first step of my algorithm is to preprocess the image with posterization & an edge detection algorithm. Since I am primarily feeding the algorithm color images I took myself, it is much more difficult to draw the image compared to using a simple black and white image. Of course I could make the image black and white, but where is the fun in that?
+The first step of my algorithm is to preprocess the image with posterization & an edge detection algorithm. 
 
-Essentially, what I’m doing is creating a handful of brightness thresholds going from 255 to 0. I want to draw the image in layers according to each range of brightness and also according to the distance from the previous pixel. By preprocessing the image, I can better prepare it for brightness analysis. First, I posterize the image to limit the channel of colors to create fewer tones, essentially creating sections of color. Then I perform edge detection using an algorithm by Crystal Chen & Paolla Dutra of NYU.
-
-The basic idea of edge detection is to approximate the change in light intensity in an image. This is done by comparing the values of pixels on the right and light side (x-direction) and also on the upper and lower side (y-direction). This is done using two 3x3 kernels for each x and y direction. The change in light intensity is the gradient magnitude of the edge computed by the following:
-
-|G| = sqrt((Gx*Gx) + (Gy*Gy))
-Gx = Gradient x-direction
-Gy = Gradient y-direction
-
-This isn’t my area of expertise, so I won’t dive to deep into it, but more information on edge detection can be found here:
+Essentially, what I’m doing is creating a handful of brightness thresholds going from 255 to 0. I want to draw the image in layers according to each range of brightness and also according to the distance from the previous pixel. By preprocessing the image, I can better prepare it for brightness analysis. First, I posterize the image to limit the channel of colors to create fewer tones, essentially creating sections of color. Then I perform edge detection using an algorithm by Crystal Chen & Paolla Dutra of NYU.<br />
+<br />
+The basic idea of edge detection is to approximate the change in light intensity in an image. This is done by comparing the values of pixels on the right and light side (x-direction) and also on the upper and lower side (y-direction). This is done using two 3x3 kernels for each x and y direction. The change in light intensity is the gradient magnitude of the edge computed by the following:<br />
+<br />
+|G| = sqrt((Gx*Gx) + (Gy*Gy))<br />
+Gx = Gradient x-direction<br />
+Gy = Gradient y-direction<br />
+<br />
+This isn’t my area of expertise, so I won’t dive to deep into it, but more information on edge detection can be found here:<br />
 https://idmnyu.github.io/p5.js-image/Edge/index.html
 
-The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.
+The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.<br />
+<br />
 
 #### Draw Image:
-Once we set up the canvas and preprocess the image, I am ready to begin drawing. As mentioned, the basic idea is to draw the image in layers according to the brightness values. This specifically allows me to not only control the shape, size, & density of the points, but makes it easier to use more complicated effects like curve lines resembling a sketch using curveVertex in p5js. 
-
-I’ve set up the following arrays to analyze brightness:
-Brightness Ranges = [255, 180, 120, 90, 60, 30, 0]
-Upper limit = Brightness Range[ Count ], ex. 255
-Lower limit = Brightness Range[ Count + 1 ] ex. 180
-
+Once we set up the canvas and preprocess the image, I am ready to begin drawing. As mentioned, the basic idea is to draw the image in layers according to the brightness values. This specifically allows me to not only control the shape, size, & density of the points, but makes it easier to use more complicated effects like curve lines resembling a sketch using curveVertex in p5js. <br />
+<br />
+I’ve set up the following arrays to analyze brightness:<br />
+Brightness Ranges = [255, 180, 120, 90, 60, 30, 0]<br />
+Upper limit = Brightness Range[ Count ], ex. 255<br />
+Lower limit = Brightness Range[ Count + 1 ] ex. 180<br />
+<br />
 Distance Threshold = [Array of values that can change based on size of image, ex. 100, 200..]
-→ This more specifically is for drawing curves or for a paint simulation. I don’t want a line being drawn all the way across the image if two unrelated regions of the image have the same brightness values.
-
-Thin Amount = [Array of values]
-→ I’d like to control the density of the image, so I’m not placing it at every pixel coordinate using a thinning algorithm. This ensures lines/curves are drawn properly and also reduces load on the algorithm. There are other performance issues with this, however, involving the storage of pixel coordinates that I will get into later in this journal.
-
-So now that I have my values set up for analyzing the image, what I then do is pull a random coordinate to find the color of that pixel and its brightness, then I map the brightness to a size value using the thin amounts, and then check it against the arrays I have set up.
-→ Does it fall in the right brightness range?
-→ Is the brightness of the current and previous pixel within the brightness threshold? 
-→ Is the distance between the current & previous pixel within the threshold?
-→ Have I used this coordinate before? (Check it against the thinning algorithm)
-
-If the coordinate passes all these checks, the coordinate is marked complete in the thinning algorithm and I place a shape, line, chicken, or other effect. Finally, I set the current X,Y coordinate to the previous X,Y before the loop continues.
-
+→ This more specifically is for drawing curves or for a paint simulation. I don’t want a line being drawn all the way across the image if two unrelated regions of the image have the same brightness values.<br />
+<br />
+Thin Amount = [Array of values]<br />
+→ I’d like to control the density of the image, so I’m not placing it at every pixel coordinate using a thinning algorithm. This ensures lines/curves are drawn properly and also reduces load on the algorithm. There are other performance issues with this, however, involving the storage of pixel coordinates that I will get into later in this journal.<br />
+<br />
+So now that I have my values set up for analyzing the image, what I then do is pull a random coordinate to find the color of that pixel and its brightness, then I map the brightness to a size value using the thin amounts, and then check it against the arrays I have set up.<br />
+→ Does it fall in the right brightness range?<br />
+→ Is the brightness of the current and previous pixel within the brightness threshold? <br />
+→ Is the distance between the current & previous pixel within the threshold?<br />
+→ Have I used this coordinate before? (Check it against the thinning algorithm)<br />
+<br />
+If the coordinate passes all these checks, the coordinate is marked complete in the thinning algorithm and I place a shape, line, chicken, or other effect. Finally, I set the current X,Y coordinate to the previous X,Y before the loop continues.<br />
+<br />
 
 #### Thinning algorithm:
-The thinning algorithm is simple but also leads to a lot of memory issues. However, without it, certain effects wouldn’t work and the speed at which effects are placed can cause too heavy a load due to all the checks the algorithm needs to do, also resulting in performance issues. 
-Essentially, the thinning algorithm takes the current coordinate and checks the coordinates around it spanning a distance related to the thin amount. If none of the coordinates are marked completed, then all those points are marked as completed.
-
-Initially, I stored coordinate information in a 2D array of X,Y values. 0 for unused, 1 for used. However, this would lead to a massive array with millions of elements that was very memory intensive. The 2D array was leading to about 400-500mb of memory usage. Optimizing this took a while to figure out but I came up with 2 improvements. 
-
-
+The thinning algorithm is simple but also leads to a lot of memory issues. However, without it, certain effects wouldn’t work and the speed at which effects are placed can cause too heavy a load due to all the checks the algorithm needs to do, also resulting in performance issues. <br />
+Essentially, the thinning algorithm takes the current coordinate and checks the coordinates around it spanning a distance related to the thin amount. If none of the coordinates are marked completed, then all those points are marked as completed.<br />
+<br />
+Initially, I stored coordinate information in a 2D array of X,Y values. 0 for unused, 1 for used. However, this would lead to a massive array with millions of elements that was very memory intensive. The 2D array was leading to about 400-500mb of memory usage. Optimizing this took a while to figure out but I came up with 2 improvements. <br />
+<br />
+<br />
 #### Cache Coherency:
-This is the first optimization I discovered when seeking to improve the performance of my algorithm. When iterating over x,y values, it is best practice to iterate according to principles of Cache Coherency.
-
-First a review of computer memory:
-→ Non-volatile: Like a hard disk drive, uses 5400 - 7200 rev/sec. Speed is slow, 80-150 mbs, so even though the CPU can accept memory faster, the hard drive can only give it so fast.
-→ Random Access Memory (RAM): Faster than HDD, but still slower than CPU. Provides memory at 400-800 MHz but CPU has clock speed of 1 GHz - 9 GHz (Hertz is number of cycles per second or the clock speed of a computer). Newer RAM is much faster at 1600 MHz - 2400 MHz.
-
-Side Note:
-Modern Day processors are not single core, they are multicore. 
-Old Days: [ CPU 1 ]
-Nowadays: CPU [ 1 2 3 4 ]
-
-So if all cores are asking for data at the same time, faster RAMs still can’t deliver data to all the cores at the same-time
-
-→ Cache Memory: Fastest among all memories. It is also a RAM but a special kind in that it is Static RAM. Size can range from KB to MB. Data requested by CPU can be supplied by cache, and there are also different levels of Cache. 
-L1 cache is integrated into the CPU itself, and each core has its own, so they can operate at the same speed as the CPU. L1 is the fastest. 
-L2 cache can be inside or outside CPU and can be shared with all cores of the CPU. If L2 is outside, then it is connected with a very high speed bus speed (256kb to 572kb).
-L3 cache, not all CPUs have it but if they do then it is outside the CPU and is shared with all cores.
-
-The following shows the flow of the CPU when looking for data:
-CPU → L1 → L2 → L3 → RAM → HDD
-First the CPU checks the cache (caching data), then if data is unavailable it checks the ram, and then finally the HDD.
-Cache is specifically much smaller than RAM and HDD because it is much costlier than other memory types. 
-
-Cache coherence refers to the problem of ensuring that multiple cache copies of the same data in a computer system are kept consistent. In a multi-core or multi-processor system, each core or processor may have its own cache, which stores copies of frequently accessed data. If multiple cores or processors are accessing the same data, there is a possibility that the data in one core's cache may become out of date, leading to inconsistencies in the system. To ensure cache coherence, various mechanisms are used to ensure that all copies of a given piece of data are kept up to date. These mechanisms may include the use of special hardware or software protocols to coordinate updates to the data across all of the caches in the system. In essence, cache coherence ensures that all processors or cores in a system are working with the same, up-to-date data, even when that data is stored in multiple different caches.
-
-→ Essentially there is one instruction copy in main memory & one in each cache. If one copy is changed, the other copies must also be changed. 
+This is the first optimization I discovered when seeking to improve the performance of my algorithm. When iterating over x,y values, it is best practice to iterate according to principles of Cache Coherency.<br />
+<br />
+First a review of computer memory:<br />
+→ Non-volatile: Like a hard disk drive, uses 5400 - 7200 rev/sec. Speed is slow, 80-150 mbs, so even though the CPU can accept memory faster, the hard drive can only give it so fast.<br />
+→ Random Access Memory (RAM): Faster than HDD, but still slower than CPU. Provides memory at 400-800 MHz but CPU has clock speed of 1 GHz - 9 GHz (Hertz is number of cycles per second or the clock speed of a computer). Newer RAM is much faster at 1600 MHz - 2400 MHz.<br />
+<br />
+Side Note:<br />
+Modern Day processors are not single core, they are multicore. <br />
+Old Days: [ CPU 1 ]<br />
+Nowadays: CPU [ 1 2 3 4 ]<br />
+<br />
+So if all cores are asking for data at the same time, faster RAMs still can’t deliver data to all the cores at the same-time<br />
+<br />
+→ Cache Memory: Fastest among all memories. It is also a RAM but a special kind in that it is Static RAM. Size can range from KB to MB. Data requested by CPU can be supplied by cache, and there are also different levels of Cache. <br />
+L1 cache is integrated into the CPU itself, and each core has its own, so they can operate at the same speed as the CPU. L1 is the fastest. <br />
+L2 cache can be inside or outside CPU and can be shared with all cores of the CPU. If L2 is outside, then it is connected with a very high speed bus speed (256kb to 572kb).<br />
+L3 cache, not all CPUs have it but if they do then it is outside the CPU and is shared with all cores.<br />
+<br />
+The following shows the flow of the CPU when looking for data:<br />
+CPU → L1 → L2 → L3 → RAM → HDD<br />
+First the CPU checks the cache (caching data), then if data is unavailable it checks the ram, and then finally the HDD.<br />
+Cache is specifically much smaller than RAM and HDD because it is much costlier than other memory types. <br />
+<br />
+Cache coherence refers to the problem of ensuring that multiple cache copies of the same data in a computer system are kept consistent. In a multi-core or multi-processor system, each core or processor may have its own cache, which stores copies of frequently accessed data. If multiple cores or processors are accessing the same data, there is a possibility that the data in one core's cache may become out of date, leading to inconsistencies in the system. To ensure cache coherence, various mechanisms are used to ensure that all copies of a given piece of data are kept up to date. These mechanisms may include the use of special hardware or software protocols to coordinate updates to the data across all of the caches in the system. In essence, cache coherence ensures that all processors or cores in a system are working with the same, up-to-date data, even when that data is stored in multiple different caches.<br />
+<br />
+→ Essentially there is one instruction copy in main memory & one in each cache. If one copy is changed, the other copies must also be changed. <br />
 
 CPU1|Cache 1	CPU2|Cache2            CPU3|Cache3           SHARED MEMORY
 |______________________|_________________|___________________________|
 
-So what does this have to do with our drawing algorithm?
-
+So what does this have to do with our drawing algorithm?<br />
+<br />
 Essentially, I was creating a 2D array in the following order [x][y]. This means I was scanning the image vertically. By changing to horizontal scanning, the data is stored closer together in memory, so there are less cache misses between different levels of cache and thus performance is faster, so it is better to scan pixels in the index they are stored. Every processor also has a very fast increment instruction for integers. It’s typically not as fast for “Increment by some amount and multiply by the second amount”. By scanning the 2D array [y][x], I optimized for cache coherency and this led to about 15% increase in efficiency. From 400-500mb to 300-400mb. In addition, I noticed visually the image was filling in much better than before. While this was a great improvement, the next optimization was significantly better. 
 
 ### 11/13/22
 
 #### The QuadTree: 
-This optimization led to a 10x performance improvement and dropped memory usage down from 300-400mb to 10-30mb as it allowed me to not need the 2D array at all, which was taking up the bulk of memory. A QuadTree is a tree-like data structure in which each node has exactly 0 or 4 children. They are used for partitioning two dimensional space. Common uses are image compression algorithms or for querying geolocation data. Uber, for example, uses a quadtree server to match drivers and riders using Google S2.
+This optimization led to a 10x performance improvement and dropped memory usage down from 300-400mb to 10-30mb as it allowed me to not need the 2D array at all, which was taking up the bulk of memory. A QuadTree is a tree-like data structure in which each node has exactly 0 or 4 children. They are used for partitioning two dimensional space. Common uses are image compression algorithms or for querying geolocation data. Uber, for example, uses a quadtree server to match drivers and riders using Google S2.<br />
 
 #### Visual Representation:
 ![plot](quadtree-visual.png)
 
-There are a few prerequisites for the quad tree:
-→ A point class denoting the x,y coordinates on a plane
-→ A rectangle class for constructing a rectangle, functions for checking what points the rectangle contains and also for checking the intersection with another shape placed on top of the quadtree (intersection isn’t 100% necessary as another shape can be used).
+There are a few prerequisites for the quad tree:<br />
+→ A point class denoting the x,y coordinates on a plane<br />
+→ A rectangle class for constructing a rectangle, functions for checking what points the rectangle contains and also for checking the intersection with another shape placed on top of the quadtree (intersection isn’t 100% necessary as another shape can be used).<br />
 
-Essentially, what the quadtree does is let you know which points are near a specified coordinate without needing to check every coordinate on a plane. Since I need to know which pixels are near a selected coordinate when drawing the image in order to thin out the number of points placed, the quadtree allows me to do this very quickly. As opposed to using a massive 2D array, I can use the quadtree to query coordinate data where the effect being placed intersects with the tree.
+Essentially, what the quadtree does is let you know which points are near a specified coordinate without needing to check every coordinate on a plane. Since I need to know which pixels are near a selected coordinate when drawing the image in order to thin out the number of points placed, the quadtree allows me to do this very quickly. As opposed to using a massive 2D array, I can use the quadtree to query coordinate data where the effect being placed intersects with the tree.<br />
 
-The quadtree constructor itself takes a rectangle boundary formed by our rectangle class, a max capacity of coordinates per rectangle before a rectangle subdivides, an array to hold the points, and a boolean for whether or not the boundary is divided (set to false at first). It will then recursively subdivide until all points on a plane are plotted. A subdivision happens once a rectangle's array hits the max capacity, at which point the division boolean will be set to true. 
+The quadtree constructor itself takes a rectangle boundary formed by our rectangle class, a max capacity of coordinates per rectangle before a rectangle subdivides, an array to hold the points, and a boolean for whether or not the boundary is divided (set to false at first). It will then recursively subdivide until all points on a plane are plotted. A subdivision happens once a rectangle's array hits the max capacity, at which point the division boolean will be set to true. <br />
 
 #### There are two functions that are required for the recursion:
-Subdivide() → creates 4 rectangles
-Insert(point) → Adds a point to the rectangles points array, if the points are at the max capacity then it subdivides.
+Subdivide() → creates 4 rectangles<br />
+Insert(point) → Adds a point to the rectangles points array, if the points are at the max capacity then it subdivides.<br />
 
 ##### Finally, there are a handful of other important functions:
-Show() → displays the quadtree
-Query() → This takes a range (in my case a rectangle) and checks the intersection of the rectangle with the quadtree and pushes any found points into a new found array, if the range contains divided regions, it recursively checks those regions as well. The resulting found array is the data around the current coordinate I am plotting. 
+Show() → displays the quadtree<br />
+Query() → This takes a range (in my case a rectangle) and checks the intersection of the rectangle with the quadtree and pushes any found points into a new found array, if the range contains divided regions, it recursively checks those regions as well. The resulting found array is the data around the current coordinate I am plotting. <br />
 
 ## Credits and Concluding Info
-This algorithm was developed via a combination of methods inspired by other creative developers as well as personal experimentation 
-This algorithm draws a given image with chickens via a database of hand-doodled chickens by yours truly (Hasib Hashemi of @WizardsRobbingKids)
-Although the primary goal was to generate murakami style images with my own work, the algorithm can also do a good job drawing the image with lines, cubes, and other shapes. Please view the output images to see some examples of what this algorithm can produce. 
-This algorithm is also able to be controlled via inputs using the keyboard or on screen sliders, size of effects can be adjusted, randomness, or even set to add additional randomness by drawing to imported music according to the sound level of the track being played. 
+This algorithm was developed via a combination of methods inspired by other creative developers as well as personal experimentation <br />
+This algorithm draws a given image with chickens via a database of hand-doodled chickens by yours truly (Hasib Hashemi of @WizardsRobbingKids) <br />
+Although the primary goal was to generate murakami style images with my own work, the algorithm can also do a good job drawing the image with lines, cubes, and other shapes. Please view the output images to see some examples of what this algorithm can produce. <br />
+This algorithm is also able to be controlled via inputs using the keyboard or on screen sliders, size of effects can be adjusted, randomness, or even set to add additional randomness by drawing to imported music according to the sound level of the track being played. <br />
 
 #### Credits to the following developers for inspiring the following methods used:
-→ Original Edge Detection Algorithm by Crystal Chen & Paolla Bruno Dutra of NYU. Algo explanation here: https://idmnyu.github.io/p5.js-image/Edge/index.html
-→ Jason Stirman inspired the drawing algorithm by providing high level details of his own drawing algo/thinning algo on Processing forums and his website. See here: https://discourse.processing.org/t/curve-density-over-an-image/3210
-→ The Coding Train for inpiring both the flocking algorithm and improvements to the thinning algorith via the use of a quadtree as opposed to a 2D array: https://thecodingtrain.com/challenges/98-quadtree.
+→ Original Edge Detection Algorithm by Crystal Chen & Paolla Bruno Dutra of NYU. Algo explanation here: https://idmnyu.github.io/p5.js-image/Edge/index.html <br />
+→ Jason Stirman inspired the drawing algorithm by providing high level details of his own drawing algo/thinning algo on Processing forums and his website. See here: https://discourse.processing.org/t/curve-density-over-an-image/3210 <br />
+→ The Coding Train for inpiring both the flocking algorithm and improvements to the thinning algorith via the use of a quadtree as opposed to a 2D array: https://thecodingtrain.com/challenges/98-quadtree. <br />
 
 
 

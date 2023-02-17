@@ -25,7 +25,7 @@ I've added below some past journal entries I wrote on building and optimizing th
 
 ### 10/24/22
 
-Below is pseudocode for my drawing algorithm & other thoughts on my process. Note everything was built in the stated order.<br />
+Below is pseudocode for my drawing algorithm & other thoughts on my process.<br />
 
 #### Preprocess image:
 The first step of my algorithm is to preprocess the image with posterization & an edge detection algorithm. 
@@ -100,7 +100,7 @@ Cache coherence refers to the problem of ensuring that multiple cache copies of 
 → Essentially there is one instruction copy in main memory & one in each cache. If one copy is changed, the other copies must also be changed. <br />
 
 CPU1|Cache 1-------CPU2|Cache2-------CPU3|Cache3-------SHARED MEMORY<br />
-|→→→→→→→→→→→→→→|→→→→→→→→→→→|→→→→→→→→→→→|<br />
+|→→→→→→→→→→→→|→→→→→→→→→→→|→→→→→→→→→→→|<br />
 
 So what does this have to do with our drawing algorithm?<br />
 <br />

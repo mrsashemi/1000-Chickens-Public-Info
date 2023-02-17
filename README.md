@@ -134,10 +134,10 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 
 ## Additional Examples
 
-*Sketch Only: My initial goal before this algorithm involved to involve my doodles was having the algorithm create sketches* <br />
+*Sketch Only: My initial goal before this algorithm involved my doodles was having the algorithm create sketches* <br />
 ![plot](/output%20images/murakami-sketch-gen.png)
 
-*This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix api's to capture even more details* <br />
+*This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix apis to capture even more details* <br />
 ![plot](/output%20images/hasibportrait-withfacialrecognition.png)
 
 *This one is just pretty :)* <br />

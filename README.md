@@ -69,9 +69,8 @@ If the coordinate passes all these checks, the coordinate is marked complete in 
 The thinning algorithm is simple but also leads to a lot of memory issues. However, without it, certain effects wouldn’t work and the speed at which effects are placed can cause too heavy a load due to all the checks the algorithm needs to do, also resulting in performance issues. <br />
 Essentially, the thinning algorithm takes the current coordinate and checks the coordinates around it spanning a distance related to the thin amount. If none of the coordinates are marked completed, then all those points are marked as completed.<br />
 <br />
-Initially, I stored coordinate information in a 2D array of X,Y values. 0 for unused, 1 for used. However, this would lead to a massive array with millions of elements that was very memory intensive. The 2D array was leading to about 400-500mb of memory usage. Optimizing this took a while to figure out but I came up with 2 improvements. <br />
-<br />
-<br />
+Initially, I stored coordinate information in a 2D array of X,Y values. 0 for unused, 1 for used. However, this would lead to a massive array with millions of elements that was very memory intensive. The 2D array was leading to about 400-500mb of memory usage. Optimizing this took a while to figure out but I came up with 2 improvements. 
+
 #### Cache Coherency:
 This is the first optimization I discovered when seeking to improve the performance of my algorithm. When iterating over x,y values, it is best practice to iterate according to principles of Cache Coherency.<br />
 <br />

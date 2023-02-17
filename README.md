@@ -45,8 +45,8 @@ https://idmnyu.github.io/p5.js-image/Edge/index.html
 
 The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.<br />
 
-*Here is a sample of what the preprocessed image would look like before being fed into the algorithm for analysis*<br />
-![plot](/output%20images/posterizewithedgedetection.png)
+*Here is a sample of what the preprocessed image would look like before being fed into the algorithm for analysis. You might notice a lot of black around the edges detected in the posterization. I actually deal with that by setting the colors of the final layer drawn, the layer that captures the darkest colors, to the colors of the original imported image instead of the colors of the posterized image.*<br />
+![plot](/output%20images/posterizewithedgedetection.png)<br />
 
 
 

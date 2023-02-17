@@ -135,8 +135,11 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 
 ## Credits and Concluding Info
 This algorithm was developed via a combination of methods inspired by other creative developers as well as personal experimentation <br />
+<br />
 This algorithm draws a given image with chickens via a database of hand-doodled chickens by yours truly (Hasib Hashemi of @WizardsRobbingKids) <br />
+<br />
 Although the primary goal was to generate murakami style images with my own work, the algorithm can also do a good job drawing the image with lines, cubes, and other shapes. Please view the output images to see some examples of what this algorithm can produce. <br />
+<br />
 This algorithm is also able to be controlled via inputs using the keyboard or on screen sliders, size of effects can be adjusted, randomness, or even set to add additional randomness by drawing to imported music according to the sound level of the track being played. <br />
 
 #### Credits to the following developers for inspiring the following methods used:

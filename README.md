@@ -1,0 +1,4 @@
+# 1000-Chickens Introduction
+1000 Chickens is an artistic image processing algorithm for drawing imported images with personally hand drawn chicken doodles stored as indexed png files and other effects such as coded geometry or paint/sketch simulations. This repo does not actually hold the codebase for the algorithm and is instead meant to be a public facing introduction to the process of creating the algorithm that generated the picture below. The codebase currently exists in a private repo, but if any potential employers, generative artists, etc are interested in seeing the code and learning more about my process, please shoot me a message! I have a gitfront link that can provide view access and I am more than happy to discuss my work around this. 
+
+![plot](generation-test.png)

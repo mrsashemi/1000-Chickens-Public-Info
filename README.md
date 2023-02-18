@@ -155,7 +155,7 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 *Sketch Only: My initial goal before this algorithm involved my doodles was having the algorithm create sketches. The algorithm could still use fine tuning for sketches specifically, however, since I've moved on to focusing on different effects, it hasn't been my main focus.* <br />
 ![image-sketch](/output%20images/murakami-sketch-gen.png)
 
-*This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses facemesh api from ML5/Tensorflow* <br />
+*This version incorporates facial recognition. This version uses facemesh api from ML5/Tensorflow. I use an algorithm to check whether a point exists inisde of the mesh, and from there I check to see which point on the facemesh is closest to the current pixel I am on. I map the z-value of the closest point to a value that will scale the size of the effect down on the face. Making it more detailed and capturin some of the contours* <br />
 ![image-gen](/output%20images/facemesh-adeeb.png)
 
 *This a sample gif of an image being generated. This is sped up and is using the original version of the algorithm where I generate the layers one at a time. The current iteration can have the layers generate all at once* <br />

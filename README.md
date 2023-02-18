@@ -34,7 +34,7 @@ The first step of my algorithm is to preprocess the image with posterization & a
 
 Essentially, what I’m doing is creating a handful of brightness thresholds going from 255 to 0. I want to draw the image in layers according to each range of brightness and also according to the distance from the previous pixel. By preprocessing the image, I can better prepare it for brightness analysis. First, I posterize the image to limit the channel of colors to create fewer tones, essentially creating sections of color. Then I perform edge detection using an algorithm by Crystal Chen & Paolla Dutra of NYU.<br />
 <br />
-The basic idea of edge detection is to approximate the change in light intensity in an image. This is done by comparing the values of pixels on the right and light side (x-direction) and also on the upper and lower side (y-direction). This is done using two 3x3 kernels for each x and y direction. The change in light intensity is the gradient magnitude of the edge computed by the following:<br />
+The basic idea of edge detection is to approximate the change in light intensity in an image. This is done by comparing the values of pixels on the right and left side (x-direction) and also on the upper and lower side (y-direction). This is done using two 3x3 kernels for each x and y direction. The change in light intensity is the gradient magnitude of the edge computed by the following:<br />
 <br />
 |G| = sqrt((Gx*Gx) + (Gy*Gy))<br />
 Gx = Gradient x-direction<br />
@@ -155,8 +155,8 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 *Sketch Only: My initial goal before this algorithm involved my doodles was having the algorithm create sketches. The algorithm could still use fine tuning for sketches specifically, however, since I've moved on to focusing on different effects, it hasn't been my main focus.* <br />
 ![image-sketch](/output%20images/murakami-sketch-gen.png)
 
-*This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses FaceApi, however, I am interested in testing out ML5/Tensorflows facemesh and bodypix apis to capture even more details* <br />
-![image-gen](/output%20images/hasibportrait-withfacialrecognition.png)
+*This version incorporates facial recognition. The eyes, brows, mouth, and nose are generating smaller effects compared to the rest of the image. This version uses facemesh api from ML5/Tensorflow* <br />
+![image-gen](/output%20images/facemesh-adeeb.png)
 
 *This a sample gif of an image being generated. This is sped up and is using the original version of the algorithm where I generate the layers one at a time. The current iteration can have the layers generate all at once* <br />
 ![video-gen](/output%20images/sample-gen.gif)

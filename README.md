@@ -143,7 +143,7 @@ In my most recent version, however, I realized edge detection and posterization 
 code(
     
     colSimilarity=sqrt((r2-r1)^2+(g2-g1)^2+(b2-b1)^2)
-    
+
 )
 
 Finding the similarity between colors actually produced a better effect than edge detection and posterization. It worked especially well in isolating where lines should be on a generated image. 
@@ -192,8 +192,10 @@ I wrote the previous section because my experiments with WEBGL and shaders essen
 
 It really seems like there isn't a perfect framework or solution for serious artist-programmers to easily create hostable work. There seemed to be some promising work being done to create a framework in Rust, but the amount of support the project was receiving seemed minimal and I was also concerned about the learning curve. I ultimately decided the best course of action would be to go bare-metal and recreate the effects I needed in vanilla JS. To my surprise, the speed boost and decrease in memory usage was pretty substantial. My algorithm went from using around 20-40mb of memory to 8-13mb of memory. I then recreated the algorithm again in React with Typescript as well (My expirements with glsl inspired me to try going the type safe route). I don't quite have all the additional features and effects like facial detections, but I am overall quite excited the updates to my algorithm now that I don't have to worry about heavy bundle sizes.
 
-*The following sample was generated with plain Vanilla JS. Notice the differences compared to the p5js examples?* <br />
-![image-gen](/output%20images/hasib-vanilla.png)<br />
+*While not the cleanest examples, The following two samples was generated with plain Vanilla JS. Notice the differences compared to the p5js examples? I've since optimized the effect further...* <br />
+![image-gen](/output%20images/vanillafd.png)<br />
+
+![image-gen](/output%20images/vanillasktch.png)<br />
 
 *This a sample gif showing off the prototype of my new site for hosting my creative work. With the optimizations I've acheived for my creative algorithms, I've actually been able to combine both the 1000 Chickens algorithm with the new shader by layering them on top of one another in react. In addition, the canvas based UI uses an interesting technique that rasterizes the DOM into a PNG and imports it into the canvas. This allows me to acheive a greater degree of accessibility with the canvas. For example, I can control the contrast of my sketches using shaders to meet AA Web Accessibility Standards. I've experimented with layered UIs in the past, but this solution references the following technique and has been adapted for my specific use case and choice of frameworks: https://annekagoss.medium.com/accessible-webgl-43d15f9caa21* <br />
 ![video-shader](/output%20images/homepage-sample.gif)<br />

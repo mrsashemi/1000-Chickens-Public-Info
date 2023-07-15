@@ -32,10 +32,8 @@ I've since updated the repo with links to the algorithm in p5js (sketch-version-
 
 Here are some updated examples:
 
-*The following two samples were generated with plain Vanilla JS. Notice the differences compared to the p5js examples?* <br />
+*The following sample was generated with plain Vanilla JS. Notice the differences compared to the p5js examples?* <br />
 ![image-gen](/output%20images/hasib-vanilla.png)<br />
-
-![image-gen](/output%20images/cleannobg-vanilla.png)<br />
 
 *This a sample gif showing off the prototype of my new site for hosting my creative work. With the optimizations I've acheived for my creative algorithms, I've actually been able to combine both the 1000 Chickens algorithm with the new shader by layering them on top of one another in react. In addition, the canvas based UI uses an interesting technique that rasterizes the DOM into a PNG and imports it into the canvas. This allows me to acheive a greater degree of accessibility with the canvas. For example, I can control the contrast of my sketches using shaders to meet AA Web Accessibility Standards. I've experimented with layered UIs in the past, but this solution references the following technique and has been adapted for my specific use case and choice of frameworks: https://annekagoss.medium.com/accessible-webgl-43d15f9caa21* <br />
 ![video-shader](/output%20images/homepage-sample.gif)<br />

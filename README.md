@@ -1,11 +1,7 @@
 # 1000-Chickens Introduction
 1000 Chickens is an artistic image processing algorithm for drawing imported images with personally hand drawn chicken doodles stored as indexed png files and other effects such as coded geometry or paint/sketch simulations. 
 
-**NOTE:** *This repo has been updated to include the codebase for my algorithm, but is not quite hosted yet. If any potential employers, generative artists, etc are interested in seeing the code in action and learning more about my process, please shoot me a message!*
-
-**NOTE:** *Sketch-version-p5js.js and effects-version-p5js/draw-layer.js is the original algorithm written in p5js. I've also included a folder (sketches-version-react) containing a recreation of the algorithm in react made to avoid the massive p5js bundle size when hosting.*
-
-
+**NOTE:** *This repo has recently been updated to include the codebase for my algorithm, but is not quite hosted yet. If any potential employers, generative artists, etc are interested in seeing the code in action and learning more about my process, please shoot me a message!*
 
 I have included examples of resulting output images and input images used, including the directory where I have indexed the chicken file pngs. The rest of this README will include journal entries detailing some of my process creating and optimizing this algorithm, plans for the algorithm, and credits to other developers/generative artists that helped inspire the different directions this project took. 
 
@@ -15,26 +11,176 @@ I have included examples of resulting output images and input images used, inclu
 
 *Scroll down to see other examples (taken from output images folder)*
 
-## Summary, Current Status, and Optimization Updates (7/14/2023)
-It's been a few months since my previous upate, but I've had a lot of revelations around further optimizing the algorithm and also better preparing it for hosting. Currently, I do have a site being made with a UI that can efficiently incorporate my generative algorithms. Its not quite hosted yet, but the prototype seems to be working well. I'll include a sample images below.
+## Core Build Process
 
-Contrary the previous update, I actually found more ways to optimize the algorithm in Javascript. When trying to create a canvas based UI around my sketches in React/Next with P5js, I found that the p5js bundle size itself was a great hinderance to the speed of the algorithm. This forced me to take a step back and really reconsider the direction of both my algorithm and the site I was creating. As a result, I decided to do a deep dive on creative frameworks and found that the majority of them aren't really built for hosting:
+**Tech Used:** The original algorithm was created in P5JS, but has recently been refactored into vanillaJS and React/Next for use without the need for creative framework. I also have included a different, but related version using GLSL Fragment Shaders.
 
- P5JS - Built for ease of use for artists and for new programmers to learn on. Bundle size is not optimized for hosting and cannot be tree-shaken, even with the minified version. 
- 
- Processing - Extremely fast but is Java based and cannot be hosted.
+This project was my introduction to image processing, and the original goal was to write an algorithm that can simply sketch an image. Over time, however, the project evolved into accomodating a variety of different effects the more I experimented. When beginning this journey, I found that resources on generative art were quite sparse. Generative artists tend to be more secretive of their code, so finding resources to guide my process was quite difficult. Creative IDE's had a few examples, but at the time I didn't quite understand the logic. The Coding Train and the community behind P5JS/Processing provided resources that were very helpful in generally understanding pixel manipulation, and later in learning optimization strategies. Ultimately, however, I felt fairly on my own during the build process.
 
- OpenFrameworks - C++ creative framework, very fast, and can be hosted via websockets. However, it seems like hosting can be quite challening and the learning curve seemed pretty steep since I'm not very familiar with programming in C++ in the first place. 
+Initially, I started by figuring out how to access the pixels of an image and use them to create a tiled effect. Below is a simple example of what that might look like in P5JS:
 
- Three.js/Pixi.js/Other JS frameworks - Other creative JS frameworks seem to work well and are designed for hosting, but I haven't discovered a framework specifically for artists. These frameworks seem more oriented towards specific use cases and the limitations made it difficult to acheive the effect I was going for (ThreeJS for 3D Shaders or Pixi JS for creating games).
+code(
+    for (let x = 0; x < img.width; x++) {
+        for (let y = 0; y < img.height; y++) {
+            let index = (x + y * img.width) * 4
 
-It really seems like there isn't a perfect framework or solution for serious artist-programmers to easily create hostable work. There seemed to be some promising work being done to create a framework in Rust, but the amount of support the project was receiving seemed minimal and I was also concerned about the learning curve. I ultimately decided the best course of action would be to go bare-metal and recreate the effects I needed in vanilla JS. To my surprise, the speed boost and decrease in memory usage was pretty substantial. My algorithm went from using around 20-40mb of memory to 8-13mb of memory. I then recreated the algorithm again in React with Typescript as well (My expirements with glsl inspired me to try going the type safe route). With some additional improvements to the image processing steps like analyzing relations between colors of current and previous pixels in addition to brightness, I also found that I didn't need the edge detection algorithm anymore either. I have not, however, implemented facial detection yet and implementing a new flocking algorithm seemed a little more complicated than necessary so for the time being I have removed these features. I am overall quite excited the updates to my algorithm now that I don't have to worry about heavy bundle sizes.
+            let r = img.pixels[randIndex + 0];
+            let g = img.pixels[randIndex + 1];
+            let b = img.pixels[randIndex + 2];
+            let b = img.pixels[randIndex + 3];
 
-I've also spent more time expirementing with shaders and now have a sister sketch to the original 1000 Chickens algorithm. My experiments have so far been fairly derivative as I've been going off of existing algorithms to generally help my understanding of shaders. However, I have been able to combine a few different algorithms into novel effects. I managed to combine my previous shader from the last update (chickens masking the hugo elias water ripple algorithm) with a quadtree shader. Essentially, I used a probabilistic quadtree algorithm to create quadtree tiling on an image. I then adapted logic to tile an image with sprites in a shader to fit my chicken doodles into the squares of the quadtree. Finally, I tried adapting the logic of the hugo elias water ripple algorithm to use the center of the quadtree tiles as opposed to random points being generated on javascript canvas side. The result is a very watery quadtree effect. Interestingly enough, I'm finding masking and combining effects to be somewhat similar to photoshop.
+            let col = color(r,g,b);
+            let bright = brightness(col);
 
-I've since updated the repo with links to the algorithm in p5js (sketch-version-p5js.js and effects-version-p5js folder), and I've also included a recreation in react+typescript (sketches-version-react folder). Examples of the shaders are also included.
+            let w = map(bright, 0, 255, Lower Threshold Value, Upper Threshold Value) //maps the brightness, which is on a scale of 0-255, to a new value between two numbers of our choice.
 
-Here are some updated examples:
+            circle(x, y, w)
+        }
+    }
+)
+
+This code iterates over the pixels of an image and uses a specific formula to find the index of the pixel we are currently on. Since each pixel is actually 4 values for RGBA, the index on its own only represents the red value, so we can simply increment up to 3 to find the rest of the color values. P5JS abstracts away a lot of the complexity behind the canvas and makes it easy to simply start coloring and drawing. Using the color of the current value, we can find it's brightness and then map that brightness to a size value. As an example, we can finish by drawing a circle at the current (X,Y) coordinate with the new size value we calculated. This code would result in a white circle with black outlines being drawn at different sizes at every pixel. The darker areas of the image would be smaller, whereas the brighter areas would have larger circles. 
+
+This was essentially the starting point for my own algorithm. As an artist, I quickly saw a lot of directions I could take this using different shapes or potentially even importing my own drawings. While this was a great starting point, it didn't necessarily get me closer to my goal of actually drawing lines. I had read about few strategies for lines for thinning out the points, but I didn't immediately understand how to implement that. Still, I thought it would be useful to experiment with different strategies of doing that with shapes. I tried incrementing the X and Y for loops by larget amounts (x+=10, y+=10) to decrease the amount of coordinates I was plotting at. I found that image not only generated faster, but reducing the density produced a nicer looking image. At this point, I put a pause on trying to generate lines and focused more on other effects. Specifically, I started experimenting with colors and also importing my own doodles to sketch an image. It was quite easy to alternate between specific effects, and if i imported my doodles as white pngs, I could tint them to the colors of the image. 
+
+Time went by, and I mostly used this as a starting point to get accustomed to creating different effects. The images were reminding me a lot of some of my favorite artists like Takashi Murakami. However, the algorithm still wasn't close to my original goal of sketch like lines. The next thing I began expirementing with is isolating where the effects were being drawn. I tried only drawing to darkers of the image:
+
+
+code(
+    draw() {
+        beginShape()
+        for (let x = 0; x < img.width; x+SkipValue) {
+            for (let y = 0; y < img.height; y+SkipValue) {
+                let index = (x + y * img.width) * 4
+
+                let r = img.pixels[randIndex + 0];
+                let g = img.pixels[randIndex + 1];
+                let b = img.pixels[randIndex + 2];
+                let b = img.pixels[randIndex + 3];
+
+                let col = color(r,g,b);
+                let bright = brightness(col);
+
+                if (bright < Brightness Threshold) {
+                    let w = map(bright, 0, 255, Lower Threshold Value, Upper Threshold Value) //maps the brightness, which is on a scale of 0-255, to a new value between two numbers of our choice.
+
+                    circle(x, y, w)
+                    //curveVertex(x,y)
+                }
+            }
+        }
+        endShape()
+    }
+)
+
+The images procuded when adding the new conditional were a little closer to what I was looking for when using black and white shapes, but not quite with lines yet. P5JS has a function for drawing a curved line through a series of plotted points. The draw function in P5JS loops infinitely, so for each iteration it would loop through the image, plot a number of points, and then draw a line through the points. With this algorithm, however, there was no way to control when to stop plotting lines. There was also no way to isolate the lines in the correct areas. Even though selectng the brightness was more specific in isolating effects, if parts of image on opposite sides of an image had a similar brightness value, then its possible a line could be drawn across the page. 
+
+Although this next step took a lot of experimenting and time to figure out, I essentially needed a way to thin out the points and to more specifically isolate the areas that are being drawn. I also realized this would not only enable the algorithm to draw lines, but would also provie a much nicer and controlled effect when drawing other effects like shapes or my doodles. A thinning algorithm would require me to record where I've already been when plotting, and I could further isolate where the effects are being drawn by accounting for how far the current pixel is from the previous pixel. I began recording the previous pixel each iteration, and checking it against a distance threshold using the dist() function in P5JS. 
+
+For the thinning algorithm, I started by storing pixel information using a 2D array of X,Y values. For each iteration I would check to see if the current pixel and each pixel surrounding it up to a certain thinning threshold were stored in the array. If the pixel passed the check (returned false for the 2d array containing the point), then I would draw/plot the point and store the pixel in the 2D array. Otherwise, I would skip the iteration and move onto the next:
+
+
+code(
+    draw() {
+        beginShape()
+        for (let x = 0; x < img.width; x+SkipValue) {
+            for (let y = 0; y < img.height; y+SkipValue) {
+                let index = (x + y * img.width) * 4
+
+                let r = img.pixels[randIndex + 0];
+                let g = img.pixels[randIndex + 1];
+                let b = img.pixels[randIndex + 2];
+                let b = img.pixels[randIndex + 3];
+
+                let col = color(r,g,b);
+                let bright = brightness(col);
+                let distance = dist(x,y,prevX,prevY);
+
+                if (bright < Brightness Threshold && distance < distanceThreshold) {
+                    if (!containsPointThinningAlgo(x,y,thin amount)) {
+                        let w = map(bright, 0, 255, Lower Threshold Value, Upper Threshold Value) //maps the brightness, which is on a scale of 0-255, to a new value between two numbers of our choice.
+
+                        curveVertex(x,y)
+                    }
+                }
+            }
+        }
+        endShape()
+    }
+)
+
+It wasn't perfect, but this worked! Threshold values required optimizing and not every image was coming out perfectly as sometimes the algorithm was too isolating. What I realized, however, is that I could actually set the algorithm up with to draw in layers according to different ranges of brightness, so there would be both a lower and upper threshold brightness. This strategy essentially became the first version of the algorithm. It worked well, I was able to fill the whole image, and I could get very specific with how effects were drawn. 
+
+From here I was able to get more creative with my effects:
+
+* Coded geometry for more interesting shapes
+* Splitting my doodles into multiple pieces that would layer on top of each other for greater color variation when tinting the image prior to drawing it to the canvas
+* Implementing algorithms for paint like effects (Using existing flocking algorithms for example)
+
+The next step was optimizing the algorithm, both for effect and speed.
+
+## Optimization Process
+
+This algorithm went through a number of revisions and optimizations to improve both the produced effect as well as the speed and memory efficiency of the algorithm. While the initial version worked, there were a number of issues. I addressed and readdressed these issues at different times, so instead of addressing them in the order I tackled them in, I'll list the issues and the process I went to solve them:
+
+**Improving the final produced effect:**
+
+The effect was working well initially, but there were a few issues. It was difficult to pin down the perfect distance value, so occassionally lines would be drawn across areas they shouldn't be. I tried implementing an existing edge detection algorithm and doing some preprocessing on the image to better align the color data. For example, by posterizing the image I could minimize the color variation and keep the brightness consistent in the different portions of the image. I also used edge detection to draw dark lines around areas of the image. The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.<br />
+
+*Here is a sample of what the preprocessed image would look like before being fed into the algorithm for analysis. You might notice a lot of black around the edges detected in the posterization. I actually deal with that by setting the colors of the final layer drawn, the layer that captures the darkest colors, to the colors of the original imported image instead of the colors of the posterized image.*<br />
+![image-edge-posterize](/output%20images/posterizewithedgedetection.png)<br />
+
+I also implemented facial detection to gain even better control over how faces would be drawn. This step came later and was acheived using the ML5 machine learning library and facemesh api. 
+
+In my most recent version, however, I realized edge detection and posterization wasn't really necessary. What I realized I could do instead, is compare the similarity of color between the current previous pixels. This can be done by measuring the euclidean distance between each RGB color value, summing the values, and then finding their square root. 
+
+code(colSimilarity=sqrt((r2-r1)^2+(g2-g1)^2+(b2-b1)^2))
+
+Finding the similarity between colors actually produced a better effect than edge detection and posterization. It worked especially well in isolating where lines should be on a generated image. 
+
+Finally, further down the line once I optimized the speed of the algorithm, I was able to throw the differet draw layers of the algorithm in their own graphical buffers. This provided a much better veiwing experience as it allowed me to draw the image all at once, as opposed to drawing it one layer at time.
+
+**Optimizing Speed and Memory:**
+
+The other major issue was the original algorithm was very slow, and crashed often, especially when trying to generate large images. The algorithm was initially using around 400-500mb of memory! It was clear why– I was plotting millions of points and storing all that information in a massive 2D array that needed to be checked every single iteration while looping through the image. However, it wasn't immediately obvious to me how to solve this issue. I tried using other basic data structures like a Javascript map, but I wasn't able to store as much data as I was able to in the array, so it wasn't viable for producing larger images. 
+
+I instead began by trying to clean and inspect the code in other areas. One of the techniques I came across involved modifying how I was iterating through the image by following the principles of Cache Coherency. I'm not quite an expert in computer memory, but from what I understand, Cache Coherency refers to the consistency of memory between different levels of cache in a multi-processor system. It is a situation where multiple processor cores share the same memory hierarchy, but have their own L1 data and instruction caches. 
+
+Essentially, I was creating a 2D array in the following order [x][y]. This means I was scanning the image vertically. By changing to horizontal scanning, the data is stored closer together in memory, so there are less cache misses between different levels of cache and thus performance is faster, so it is better to scan pixels in the index they are stored. Every processor also has a very fast increment instruction for integers. It’s typically not as fast for “Increment by some amount and multiply by the second amount”. By scanning the 2D array [y][x], I optimized for cache coherency and this led to about 15% increase in efficiency. From 400-500mb to 300-400mb. In addition, I noticed visually the image was filling in much better than before. 
+
+While this was a great improvement, I ultimately found it unnecessary. What I ended up doing isntead was removing the need for the double for loop that iterates over the image within the draw loop. I instead opted for randomly selecting X,Y coordinates and iterating over a preselected amount in a single loop. This was marginally more memory effecient without any changes to the produced effect. While these techniques were both great improvements, the next optimization was significantly better. 
+
+After a lot of research into image processig optimization, I found that a QuadTree data structure to be the answer to my massive array issue. This optimization led to a 10x performance improvement and dropped memory usage down from 300-400mb to 20-40mb as it allowed me to not need the thinning algorithm or 2D array at all, which was taking up the bulk of memory. A QuadTree is a tree-like data structure in which each node has exactly 0 or 4 children. They are used for partitioning two dimensional space. Common uses are image compression algorithms or for querying geolocation data. Uber, for example, uses a quadtree server to match drivers and riders using Google S2. Essentially, what the quadtree does is let you know which points are near a specified coordinate without needing to check every coordinate on a plane. Since I need to know which pixels are near a selected coordinate when drawing the image in order to thin out the number of points placed, the quadtree allows me to do this very quickly. As opposed to using a massive 2D array, I can use the quadtree to query coordinate data where the effect being placed intersects with the tree.
+
+![plot](quadtree-visual.png)
+
+**Side Note On Shaders:**
+
+This isn't quite related to the core algorithm being discussed in this repo, but is instead something that came about in my optimization efforts and is related to a sister program I created using shaders. In researching image processing and generative art optimization techniques, I kept coming across shaders as a solution to limitatiosn any object oriented programming language had when coding computer graphics. Of course, each suggestion had a disclaimer that shaders were extremely difficult. 
+
+Shaders can be displayed in a WEBGL environment and are written in a low-level GPU language, GLSL. The logic is completely different than any sort of image processing done in javascript. As opposed to working sequentially–grabbing one pixel at a time–shaders allow you access the entire pixel matrix simultaneously using the power of the GPU. They are extremely powerful, but this is also what makes them so difficult– it's pure matrix math. As a side note, there are two kinds of shaders– vertex and fragment. I specifically have expiremented with fragment shaders and have only used boilerplate for the vertex shaders. 
+
+While trying to optimize my core algorithm, I got side tracked by shaders thinking I could possibly create a new, faster version of my algorithm with them. I didn't really know where to begin, so I started by reading *The Book of Shaders* and by following a basic guide to recreate the hugo elias water ripple algorithm. The water ripple algorithm is similar to the algorithm I have been creating in that it requires reading current and previous pixel information to calculate the offset between the state of the pixels. I could start by simply plotting points in the canvas, and then pass previous and current pixel information by capturing the entire state of the canvas as as buffer and passing it into the shader, this creates a pattern where a shader is essentially being passed into itself. 
+
+While I managed to get the Hugo Elias water ripple algorithm to work, I wasn't really sure how I could translate a shader into the 1000 Chickens algorithm, so I instead experimented with other effects I could create. My first attempt at doing something on my own was to try and combine the water ripple algorithm with my chicken doodles using a custom masking effect to make my chickens look like water droplets. The experiments here helped me better wrap my head around shaders and in a lot of ways found them to be somewhat similar to photoshopping an image. To acheive a masking effect, I played around with both applying the logic of the hugo elias algorithm to incorporate pixel coordinate values from the chicken doodles and also by experimenting by substracting the color values of my chicken doodles from the results of the water ripple algorithm. 
+
+*Those experiments resulted in this.* <br />
+![video-shader](/output%20images/shader-sample.gif)
+
+I've since taken this shader and combined it yet again with another existing shader technique. I found a nifty article on creating a quadtree in a shader using a probabilistic method. Generally, quadtrees are constructed recursively but this isn't possible using a shader. Instead, you can pretile an image in the shader, and then use the variance of colors at the center of the tile to determine whether or not the shader should be subdivided. You would then repeat this process for a preselected number of iterations. Essentially, I used a probabilistic quadtree algorithm to create quadtree tiling on an image. I then adapted logic to tile an image with sprites in a shader to fit my chicken doodles into the squares of the quadtree. Finally, I tried adapting the logic of the hugo elias water ripple algorithm to use the center of the quadtree tiles as opposed to random points being generated on javascript canvas side. The result is a very watery quadtree effect. See the next section for an example.
+
+Although experiments have so far been fairly derivative, its been great proucing novel effects with unique implementations and also seeing how ligthning fast a shader can be.  
+
+**Further Optimizations for Hosting:**
+
+I wrote the previous section because my experiments with WEBGL and shaders essentially lead to further optimizations of my this repos primary algorithm. I reached a point where I thought I couldn't find a way to further optimize my algorithm as I thought my limitations was the language itself. I also wasn't sure if my algorithm would be hostable and settled on just featuring my shader program in an eventual site for my creative work. However, when trying to create a canvas based UI around my sketches in React/Next with P5js, I found that the p5js bundle size itself was a great hinderance to the speed of the algorithm. This forced me to take a step back and really reconsider the direction of both my algorithm and the site I was creating. As a result, I decided to do a deep dive on creative frameworks and found that the majority of them aren't really built for hosting:
+
+* P5JS - Built for ease of use for artists and for new programmers to learn on. Bundle size is not optimized for hosting and cannot be tree-shaken, even with the minified version. 
+* Processing - Extremely fast but is Java based and cannot be hosted.
+* OpenFrameworks - C++ creative framework, very fast, and can be hosted via websockets. However, it seems like hosting can be quite challening and the learning curve seemed pretty steep since I'm not very familiar with programming in C++ 
+* Three.js/Pixi.js/Other JS frameworks - Other creative JS frameworks seem to work well and are designed for hosting, but I haven't discovered a framework specifically for artists. These frameworks seem more oriented towards specific use cases and the limitations made it difficult to acheive the effect I was going for (ThreeJS for 3D Shaders or Pixi JS for creating games).
+
+It really seems like there isn't a perfect framework or solution for serious artist-programmers to easily create hostable work. There seemed to be some promising work being done to create a framework in Rust, but the amount of support the project was receiving seemed minimal and I was also concerned about the learning curve. I ultimately decided the best course of action would be to go bare-metal and recreate the effects I needed in vanilla JS. To my surprise, the speed boost and decrease in memory usage was pretty substantial. My algorithm went from using around 20-40mb of memory to 8-13mb of memory. I then recreated the algorithm again in React with Typescript as well (My expirements with glsl inspired me to try going the type safe route). I don't quite have all the additional features and effects like facial detections, but I am overall quite excited the updates to my algorithm now that I don't have to worry about heavy bundle sizes.
 
 *The following sample was generated with plain Vanilla JS. Notice the differences compared to the p5js examples?* <br />
 ![image-gen](/output%20images/hasib-vanilla.png)<br />
@@ -45,146 +191,11 @@ Here are some updated examples:
 *The way this shader is set up and how the water ripple algorithm works, each frame of the shader is passed back into itself. Interesting things happen when I set up the canvas to manually drop frames at the click of a button* <br />
 ![image-gen](/output%20images/hasibshader.PNG)<br />
 
-## Previous Update (2/16/2023)
-The current algorithm is optimized and quite powerful. I've recently introduced facial detection using libraries from ML5js for havng greater control over how faces are drawn. 
+## Concluding Thoughts
 
-At this point, I am looking to host the project on a personal site along with other work I've created as an artist (including physical work, photography, and digital/generative work). I've recently been prototyping smaller apps that will eventually be merged together to create my artists site, so I will have a live version of the algorithm as soon as possible. 
+This journey of creating and optimizing a creative algorithm has been incredible for my learning and understanding of both computer science and the software developmet process. It's helped me become comfortable with ambiguity while also trying to be realistic in my goals. I've teckled challenging optimization issues, and in the process have become comfortable finding unique solutions and being more language agnostic when trying to acheive specific outcomes. Feel free to check out the journal.md to see my thoughts and optimizations in a more detailed, free flow state. 
 
-I've otherwise been looking at ways to further optimize my algorithm. There may be more I can clean up with the algorithm or something I'm missing, but I'm at a point where I believe I'm approaching the limit of how powerful this algorithm can get with p5js/javascript in particular. I'll detail below how the algorithm runs, but it is essentially drawing these images in layers according to a pixels brightness value. With the quadtree, I've currently optimized it to the extent that I can have each layer running in its own graphical buffer and generate the image all at once. Thats about 8-10 graphical buffers running the algorithm simultaneously, and this includes some fairly heavy effects such as a flocking algorithm that simulates spray paint. 
-
-For reference, before the quadtree I was querying millions of coordinates using a 2D array, and each layer was being drawn one at a time using a mouse click to switch between layers taking 30 or more minutes to generate an image. The 2D array was using around 400mb of memory. With the quadtree and including the added stress I've added to the system with the graphical buffers and complicated effects, the algorithm only uses about 20-40mb of memory, and can generate within 5-10minutes. 
-
-At this point, one option for further optimization is migrating the algorithm to processing (java), which is much quicker at pixel manipulations as a lower level language. However, I wouldn't be able to host the algorithm without using a compiler that converts the code to javascript anyways. Though, I am still considering it as an option to have a more powerful version purely for generating art and creating videos.
-
-The other option, and the one im currently exploring, is creating a new iteration using GLSL shaders. Shaders would allow me to code directly to the GPU. They are essentially how video games are made, and are very challenging as it's pure matrix math. The logic flips everything I know about programming on its head. Basically, shaders are capable of manipulating the entire matrix of pixels all at once, and that's what makes them so difficult but also so powerful. In javascript, for example, things happen sequentially. I can grab a pixel, do something to it, and move on. With a shader, however, I don't get a pixel...I am all the pixels. With a shader I wouldn't need any fancy data structures as pixel manipulation happens all at once. Instead, I can pass previous and current pixel information by capturing the entire state as as buffer and passing it into the shader, this creates a pattern where a shader is essentially being passed into itself. I'm still wrapping my head around how they work, and how I can work all my chickens into them, but I have began playing around with the kinds of effects I can make with them. Essentially, I can use WEBGL mode in p5js to display the shaders. I may not be able to get the exact same effect as the current algorithm, but I should be able to create an extremely powerful version that is hostable and even more interesting with interactable effects. For example, I'm currently testing a watercolor effect in p5 and glsl that has the chicken png files generating as though they are water droplets and the mouse is able to move the pixels around like ink/water. Its a combination of the hugo elias water ripple algorithm with a custom masking effect to make my chickens look like water droplets. I've included a sample of my current work with them below but I'll dive more into my progress with them another time... 
-
-## Process (Past Journal Entries)
-I've added below some past journal entries I wrote on building and optimizing the algorthim. <br />
-
-### 10/24/22
-
-Below is pseudocode for my drawing algorithm & other thoughts on my process.<br />
-
-#### Preprocess image:
-The first step of my algorithm is to preprocess the image with posterization & an edge detection algorithm. 
-
-Essentially, what I’m doing is creating a handful of brightness thresholds going from 255 to 0. I want to draw the image in layers according to each range of brightness and also according to the distance from the previous pixel. By preprocessing the image, I can better prepare it for brightness analysis. First, I posterize the image to limit the channel of colors to create fewer tones, essentially creating sections of color. Then I perform edge detection using an algorithm by Crystal Chen & Paolla Dutra of NYU.<br />
-<br />
-The basic idea of edge detection is to approximate the change in light intensity in an image. This is done by comparing the values of pixels on the right and left side (x-direction) and also on the upper and lower side (y-direction). This is done using two 3x3 kernels for each x and y direction. The change in light intensity is the gradient magnitude of the edge computed by the following:<br />
-<br />
-|G| = sqrt((Gx*Gx) + (Gy*Gy))<br />
-Gx = Gradient x-direction<br />
-Gy = Gradient y-direction<br />
-<br />
-This isn’t my area of expertise, so I won’t dive to deep into it, but more information on edge detection can be found here:<br />
-https://idmnyu.github.io/p5.js-image/Edge/index.html
-
-The idea behind posterizing and then detecting the edges, however, is to create sections of color in the image. So it not only detects edges on the objects in the image, but also somewhat separates the regions of color, making it easier to draw.<br />
-
-*Here is a sample of what the preprocessed image would look like before being fed into the algorithm for analysis. You might notice a lot of black around the edges detected in the posterization. I actually deal with that by setting the colors of the final layer drawn, the layer that captures the darkest colors, to the colors of the original imported image instead of the colors of the posterized image.*<br />
-![image-edge-posterize](/output%20images/posterizewithedgedetection.png)<br />
-
-
-
-#### Draw Image:
-Once we set up the canvas and preprocess the image, I am ready to begin drawing. As mentioned, the basic idea is to draw the image in layers according to the brightness values. This specifically allows me to not only control the shape, size, & density of the points, but makes it easier to use more complicated effects like curve lines resembling a sketch using curveVertex in p5js. <br />
-<br />
-I’ve set up the following arrays to analyze brightness:<br />
-Brightness Ranges = [255, 180, 120, 90, 60, 30, 0]<br />
-Upper limit = Brightness Range[ Count ], ex. 255<br />
-Lower limit = Brightness Range[ Count + 1 ] ex. 180<br />
-<br />
-Distance Threshold = [Array of values that can change based on size of image, ex. 100, 200..]<br />
-→ This more specifically is for drawing curves or for a paint simulation. I don’t want a line being drawn all the way across the image if two unrelated regions of the image have the same brightness values.<br />
-<br />
-Thin Amount = [Array of values]<br />
-→ I’d like to control the density of the image, so I’m not placing it at every pixel coordinate using a thinning algorithm. This ensures lines/curves are drawn properly and also reduces load on the algorithm. There are other performance issues with this, however, involving the storage of pixel coordinates that I will get into later in this journal.<br />
-<br />
-So now that I have my values set up for analyzing the image, what I then do is pull a random coordinate to find the color of that pixel and its brightness, then I map the brightness to a size value using the thin amounts, and then check it against the arrays I have set up.<br />
-→ Does it fall in the right brightness range?<br />
-→ Is the brightness of the current and previous pixel within the brightness threshold? <br />
-→ Is the distance between the current & previous pixel within the threshold?<br />
-→ Have I used this coordinate before? (Check it against the thinning algorithm)<br />
-<br />
-If the coordinate passes all these checks, the coordinate is marked complete in the thinning algorithm and I place a shape, line, chicken, or other effect. Finally, I set the current X,Y coordinate to the previous X,Y before the loop continues.
-
-##### How different effects are drawn:
-If you take a look at some of my sample images, you'll notice a variety of different effects beyond just the chickens, and even with the chickens you may be wondering how I can get so detailed by filling the different parts of the chicken with different colors.<br />
-
-As for the chickens, each one is actually 4 different png files. I've been extracting these chicken doodles from my physical work as an artist into photoshop, and chopping each one into 4 different pieces:<br />
-The outline<br />
-The main body<br />
-Detail 1<br />
-Detail 2<br />
-
-Each of these files is imported into the algorithm as a white image and then tinted to the color of the pixel. I can get extra color detail onto each chicken by tinting certain parts the color of the previous pixel or the color of the image before preprocessing, but I tend to tint the outline color black. Currently, I have about 80 chickens indexed which equates to about 320 tiny png files. I have A LOT of chickens I've drawn over the years that I intend on eventually indexing into this algorithm, I'm anticipating that number will eventually be 1000. <br />
-
-As for the other effects...<br />
-
-The shapes are coded geometry using common algorithms for different shapes I found online. Some of the shapes like the polygon and starts have algorithms that can take in a number and spit out a shape with a different number of sides or points, so I've baked some randomness into the algorithm that can switch up how many sides or points a shape has. In addition, I'm using a library called p5.scribble that can give objects created on the p5 canvas a handrawn look. This is helpful in that it helps produce an even look between the shapes and chicken images. However, I did have to adjust the shape algorithms to be able to work with p5.scribble as the way p5.scribble creates shapes and vertices is different than how I initially found the algorithms. <br />
-
-The curvey line effect was acheived using the curveVertex() function in p5js. It plots a handful of points and draws a curve through them. I actually initially was interested in designing this algorithm to work with this method. As a more complicated effect, I can't just plot a point at every pixel coordinate or else I'd end up with the entire image being a line, so I had to implement a thinning algorithm to spread out the coordinates (discussed below). This thinning algorithm helped with acheiving a higher level of detail in the output image when plotting just shapes as well.<br />
-
-The painted effect is a flocking algorithm I found online following the Coding Train. I'm not exactly a physics expert so I won't go into detail on how it works but it is simulating how birds/bees flock in the air, and adds a nice motion on the image when generating that reminds me somewhat of spray paint.<br />
-#### Thinning algorithm:
-The thinning algorithm is simple but also leads to a lot of memory issues. However, without it, certain effects wouldn’t work and the speed at which effects are placed can cause too heavy a load due to all the checks the algorithm needs to do, also resulting in performance issues. <br />
-Essentially, the thinning algorithm takes the current coordinate and checks the coordinates around it spanning a distance related to the thin amount. If none of the coordinates are marked completed, then all those points are marked as completed.<br />
-<br />
-Initially, I stored coordinate information in a 2D array of X,Y values. 0 for unused, 1 for used. However, this would lead to a massive array with millions of elements that was very memory intensive. The 2D array was leading to about 400-500mb of memory usage. Optimizing this took a while to figure out but I came up with 2 improvements. 
-
-#### Cache Coherency:
-This is the first optimization I discovered when seeking to improve the performance of my algorithm. When iterating over x,y values, it is best practice to iterate according to principles of Cache Coherency. Note, I'm not at all an expert on the following topic, but I am sharing some of my notes and what I've come to understand about computer memory.<br />
-<br />
-To understand cache coherence, it's best to first have a review of computer memory:<br />
-→ Non-volatile Memory: Like a hard disk drive, uses 5400 - 7200 rev/sec. Speed is slow, 80-150 mbs, so even though the CPU can accept memory faster, the hard drive can only give it so fast.<br />
-→ Random Access Memory (RAM): Faster than HDD, but still slower than CPU. Provides memory at 400-800 MHz but CPU has clock speed of 1 GHz - 9 GHz (Hertz is number of cycles per second or the clock speed of a computer). Newer RAM is much faster at 1600 MHz - 2400 MHz.<br />
-<br />
-Side Note: Modern Day processors are not single core, they are multicore, so if all cores are asking for data at the same time, faster RAMs still can’t deliver data to all the cores at the same-time<br />
-Old Days: [ CPU 1 ]<br />
-Nowadays: CPU [ 1 2 3 4 ]<br />
-<br />
-→ Cache Memory: Fastest among all memories. It is also a RAM but a special kind in that it is Static RAM. Size can range from KB to MB. Data requested by CPU can be supplied by cache, and there are also different levels of Cache. <br />
-L1 cache is integrated into the CPU itself, and each core has its own, so they can operate at the same speed as the CPU. L1 is the fastest. <br />
-L2 cache can be inside or outside CPU and can be shared with all cores of the CPU. If L2 is outside, then it is connected with a very high speed bus speed (256kb to 572kb).<br />
-L3 cache, not all CPUs have it but if they do then it is outside the CPU and is shared with all cores.<br />
-<br />
-The following shows the flow of the CPU when looking for data:<br />
-CPU → L1 → L2 → L3 → RAM → HDD<br />
-First the CPU checks the cache (caching data), then if data is unavailable it checks the ram, and then finally the HDD.<br />
-Cache is specifically much smaller than RAM and HDD because it is much costlier than other memory types. <br />
-<br />
-Cache coherence refers to the problem of ensuring that multiple cache copies of the same data in a computer system are kept consistent. In a multi-core or multi-processor system, each core or processor may have its own cache, which stores copies of frequently accessed data. If multiple cores or processors are accessing the same data, there is a possibility that the data in one core's cache may become out of date, leading to inconsistencies in the system. To ensure cache coherence, various mechanisms are used to ensure that all copies of a given piece of data are kept up to date. These mechanisms may include the use of special hardware or software protocols to coordinate updates to the data across all of the caches in the system. In essence, cache coherence ensures that all processors or cores in a system are working with the same, up-to-date data, even when that data is stored in multiple different caches.<br />
-<br />
-→ Essentially there is one instruction copy in main memory & one in each cache. If one copy is changed, the other copies must also be changed. <br />
-CPU1|Cache 1-------CPU2|Cache2-------CPU3|Cache3-------SHARED MEMORY<br />
-
-So what does this have to do with our drawing algorithm?<br />
-<br />
-Essentially, I was creating a 2D array in the following order [x][y]. This means I was scanning the image vertically. By changing to horizontal scanning, the data is stored closer together in memory, so there are less cache misses between different levels of cache and thus performance is faster, so it is better to scan pixels in the index they are stored. Every processor also has a very fast increment instruction for integers. It’s typically not as fast for “Increment by some amount and multiply by the second amount”. By scanning the 2D array [y][x], I optimized for cache coherency and this led to about 15% increase in efficiency. From 400-500mb to 300-400mb. In addition, I noticed visually the image was filling in much better than before. While this was a great improvement, the next optimization was significantly better. 
-
-### 11/13/22
-
-#### The QuadTree: 
-This optimization led to a 10x performance improvement and dropped memory usage down from 300-400mb to 10-30mb as it allowed me to not need the 2D array at all, which was taking up the bulk of memory. A QuadTree is a tree-like data structure in which each node has exactly 0 or 4 children. They are used for partitioning two dimensional space. Common uses are image compression algorithms or for querying geolocation data. Uber, for example, uses a quadtree server to match drivers and riders using Google S2.<br />
-
-#### Visual Representation:
-![plot](quadtree-visual.png)
-
-There are a few prerequisites for the quad tree:<br />
-→ A point class denoting the x,y coordinates on a plane<br />
-→ A rectangle class for constructing a rectangle, functions for checking what points the rectangle contains and also for checking the intersection with another shape placed on top of the quadtree (intersection isn’t 100% necessary as another shape can be used).<br />
-
-Essentially, what the quadtree does is let you know which points are near a specified coordinate without needing to check every coordinate on a plane. Since I need to know which pixels are near a selected coordinate when drawing the image in order to thin out the number of points placed, the quadtree allows me to do this very quickly. As opposed to using a massive 2D array, I can use the quadtree to query coordinate data where the effect being placed intersects with the tree.<br />
-
-The quadtree constructor itself takes a rectangle boundary formed by our rectangle class, a max capacity of coordinates per rectangle before a rectangle subdivides, an array to hold the points, and a boolean for whether or not the boundary is divided (set to false at first). It will then recursively subdivide until all points on a plane are plotted. A subdivision happens once a rectangle's array hits the max capacity, at which point the division boolean will be set to true. <br />
-
-#### There are two functions that are required for the recursion:
-Subdivide() → creates 4 rectangles<br />
-Insert(point) → Adds a point to the rectangles points array, if the points are at the max capacity then it subdivides.<br />
-
-##### Finally, there are a handful of other important functions:
-Show() → displays the quadtree<br />
-Query() → This takes a range (in my case a rectangle) and checks the intersection of the rectangle with the quadtree and pushes any found points into a new found array, if the range contains divided regions, it recursively checks those regions as well. The resulting found array is the data around the current coordinate I am plotting. <br />
+I started this early on in my programming journey and am still in the process of building and improving. Next step is getting my algorithms live!
 
 ## Additional Examples
 
@@ -197,13 +208,9 @@ Query() → This takes a range (in my case a rectangle) and checks the intersect
 *This a sample gif of an image being generated. This is sped up and is using the original version of the algorithm where I generate the layers one at a time. The current iteration can have the layers generate all at once* <br />
 ![video-gen](/output%20images/sample-gen.gif)
 
-*This is a sneak peek into what kind of effects I can acheive with shaders.* <br />
-![video-shader](/output%20images/shader-sample.gif)
 
-
-
-## Credits and Concluding Info
-This algorithm was developed via a combination of methods inspired by other creative developers as well as personal experimentation <br />
+## Credits 
+Although produced through pure experimentation, this algorithm includes a combination of methods inspired by a community of creative developers. The images used in and produced from the algorithm are my own personal copyright. The algo isn't for release and is not hosted yet. I am currently using the algorithm and images produced for creating works related to my art practice. Please contact me if interested in learning more about the algo or if you'd like to see it in action. <br />
 <br />
 This algorithm draws a given image with chickens via a database of hand-doodled chickens by yours truly (Hasib Hashemi of @WizardsRobbingKids) <br />
 <br />

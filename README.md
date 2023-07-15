@@ -37,9 +37,11 @@ Here are some updated examples:
 
 ![image-gen](/output%20images/cleannobg-vanilla.png)<br />
 
-*This a sample gif showing off the prototype of my new site for hosting my creative work. With the optimizations I've acheived for my creative algorithms, I've actually been able to combine both the 1000 Chickens algorithm with the new shader by layering them on top of one another in react. In addition, the canvas based UI uses an interesting technique that rasterizes the DOM into a PNG and imports it into the canvas. This allows me to acheive a greater degree of accessibility with the canvas. For example, I can control the contrast of my sketches using shaders to meet AA Web Accessibility Standards. I've experimented with layered UIs in the past, but this solution references the following technique but has been adapted for my specific use case and choice of frameworks: https://annekagoss.medium.com/accessible-webgl-43d15f9caa21* <br />
+*This a sample gif showing off the prototype of my new site for hosting my creative work. With the optimizations I've acheived for my creative algorithms, I've actually been able to combine both the 1000 Chickens algorithm with the new shader by layering them on top of one another in react. In addition, the canvas based UI uses an interesting technique that rasterizes the DOM into a PNG and imports it into the canvas. This allows me to acheive a greater degree of accessibility with the canvas. For example, I can control the contrast of my sketches using shaders to meet AA Web Accessibility Standards. I've experimented with layered UIs in the past, but this solution references the following technique and has been adapted for my specific use case and choice of frameworks: https://annekagoss.medium.com/accessible-webgl-43d15f9caa21* <br />
 ![video-shader](/output%20images/homepage-sample.gif)<br />
 
+*The way this shader is set up and how the water ripple algorithm works, each frame of the shader is passed back into itself. Interesting things happen when I set up the canvas to manually drop frames at the click of a button* <br />
+![image-gen](/output%20images/hasibshader.PNG)<br />
 
 ## Previous Update (2/16/2023)
 The current algorithm is optimized and quite powerful. I've recently introduced facial detection using libraries from ML5js for havng greater control over how faces are drawn. 

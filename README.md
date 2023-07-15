@@ -20,6 +20,7 @@ This project was my introduction to image processing, and the original goal was 
 Initially, I started by figuring out how to access the pixels of an image and use them to create a tiled effect. Below is a simple example of what that might look like in P5JS:
 
 code(
+
     for (let x = 0; x < img.width; x++) {
         for (let y = 0; y < img.height; y++) {
             let index = (x + y * img.width) * 4
@@ -37,6 +38,7 @@ code(
             circle(x, y, w)
         }
     }
+
 )
 
 This code iterates over the pixels of an image and uses a specific formula to find the index of the pixel we are currently on. Since each pixel is actually 4 values for RGBA, the index on its own only represents the red value, so we can simply increment up to 3 to find the rest of the color values. P5JS abstracts away a lot of the complexity behind the canvas and makes it easy to simply start coloring and drawing. Using the color of the current value, we can find it's brightness and then map that brightness to a size value. As an example, we can finish by drawing a circle at the current (X,Y) coordinate with the new size value we calculated. This code would result in a white circle with black outlines being drawn at different sizes at every pixel. The darker areas of the image would be smaller, whereas the brighter areas would have larger circles. 
@@ -47,6 +49,7 @@ Time went by, and I mostly used this as a starting point to get accustomed to cr
 
 
 code(
+
     draw() {
         beginShape()
         for (let x = 0; x < img.width; x+SkipValue) {
@@ -71,6 +74,7 @@ code(
         }
         endShape()
     }
+
 )
 
 The images procuded when adding the new conditional were a little closer to what I was looking for when using black and white shapes, but not quite with lines yet. P5JS has a function for drawing a curved line through a series of plotted points. The draw function in P5JS loops infinitely, so for each iteration it would loop through the image, plot a number of points, and then draw a line through the points. With this algorithm, however, there was no way to control when to stop plotting lines. There was also no way to isolate the lines in the correct areas. Even though selectng the brightness was more specific in isolating effects, if parts of image on opposite sides of an image had a similar brightness value, then its possible a line could be drawn across the page. 
@@ -81,6 +85,7 @@ For the thinning algorithm, I started by storing pixel information using a 2D ar
 
 
 code(
+
     draw() {
         beginShape()
         for (let x = 0; x < img.width; x+SkipValue) {
@@ -107,6 +112,7 @@ code(
         }
         endShape()
     }
+
 )
 
 It wasn't perfect, but this worked! Threshold values required optimizing and not every image was coming out perfectly as sometimes the algorithm was too isolating. What I realized, however, is that I could actually set the algorithm up with to draw in layers according to different ranges of brightness, so there would be both a lower and upper threshold brightness. This strategy essentially became the first version of the algorithm. It worked well, I was able to fill the whole image, and I could get very specific with how effects were drawn. 
@@ -134,7 +140,11 @@ I also implemented facial detection to gain even better control over how faces w
 
 In my most recent version, however, I realized edge detection and posterization wasn't really necessary. What I realized I could do instead, is compare the similarity of color between the current previous pixels. This can be done by measuring the euclidean distance between each RGB color value, summing the values, and then finding their square root. 
 
-code(colSimilarity=sqrt((r2-r1)^2+(g2-g1)^2+(b2-b1)^2))
+code(
+    
+    colSimilarity=sqrt((r2-r1)^2+(g2-g1)^2+(b2-b1)^2)
+    
+)
 
 Finding the similarity between colors actually produced a better effect than edge detection and posterization. It worked especially well in isolating where lines should be on a generated image. 
 
@@ -210,7 +220,7 @@ I started this early on in my programming journey and am still in the process of
 
 
 ## Credits 
-Although produced through pure experimentation, this algorithm includes a combination of methods inspired by a community of creative developers. The images used in and produced from the algorithm are my own personal copyright. The algo isn't for release and is not hosted yet. I am currently using the algorithm and images produced for creating works related to my art practice. Please contact me if interested in learning more about the algo or if you'd like to see it in action. <br />
+Although produced through pure experimentation, this algorithm includes a combination of methods inspired by a community of creative developers. The images used in and produced from the algorithm are my own personal copyright. The algo isn't for release and is not hosted yet. I am currently using the algorithm and images produced for creating works related to my art practice. Please contact me if interested in learning more about the algo, if you'd like to see it in action, or are interested in purchasing/commisioning prints. <br />
 <br />
 This algorithm draws a given image with chickens via a database of hand-doodled chickens by yours truly (Hasib Hashemi of @WizardsRobbingKids) <br />
 <br />

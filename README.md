@@ -3,6 +3,10 @@
 
 **NOTE:** *This repo has been updated to include the codebase for my algorithm, but is not quite hosted yet. If any potential employers, generative artists, etc are interested in seeing the code in action and learning more about my process, please shoot me a message!*
 
+**NOTE:** *Sketch-version-p5js.js and effects-version-p5js/draw-layer.js is the original algorithm written in p5js. I've also included a folder (sketches-version-react) containing a recreation of the algorithm in react made to avoid the massive p5js bundle size when hosting.*
+
+
+
 I have included examples of resulting output images and input images used, including the directory where I have indexed the chicken file pngs. The rest of this README will include journal entries detailing some of my process creating and optimizing this algorithm, plans for the algorithm, and credits to other developers/generative artists that helped inspire the different directions this project took. 
 
 ![image-gen](generation-test.png)<br />
